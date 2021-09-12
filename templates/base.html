@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>{% block title %} {% endblock %}</title>
+    <link rel="stylesheet" href="/static/layui/css/layui.css">
+    <style>
+        .namespace {
+            margin-top: 10px;
+        }
+
+        .namespace select, .namespace option {
+            width: 200px;
+            height: 38px;
+            font-size: 20px;
+            color: #2F4056;
+        }
+        .layui-table-cell {
+            height: inherit;
+        }
+    </style>
+</head>
+<body class="layui-layout-body">
+{% csrf_token %}
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header layui-bg-cyan">
+        <div class="layui-logo layui-hide-xs" style="color: white; font-size: 26px;font-weight: bold">k8s管理平台</div>
+        <!-- 头部区域（可配合layui 已有的水平导航） -->
+        <ul class="layui-nav layui-layout-left">
+            <!-- 移动端显示 -->
+            <li class="layui-nav-item layui-show-xs-inline-block layui-hide-sm" lay-header-event="menuLeft">
+                <i class="layui-icon layui-icon-spread-left"></i>
+            </li>
+            <div class="namespace">
+                <select name="namespace" id="nsSelect">
+                </select>
+            </div>
+        </ul>
+        <ul class="layui-nav layui-layout-right">
+            <li class="layui-nav-item layui-hide layui-show-md-inline-block">
+                <a href="/logout">
+                    注销
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="layui-side layui-bg-cyan">
+        <div class="layui-side-scroll">
+            <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+            <ul class="layui-nav layui-nav-tree layui-bg-cyan" lay-filter="test">
+                <li class="layui-nav-item layui-nav-itemed">
+                <li class="layui-nav-item"><a href="">平台概述</a></li>
+                <li class="layui-nav-item {% block nav-item-1 %}{% endblock %}">
+                    <a class="" href="javascript:;">Kubernetes</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="{% url 'node' %}" class="{% block nav-this-1-1 %}{% endblock %}">Nodes</a></dd>
+                        <dd><a href="{% url 'namespace' %}"
+                               class="{% block nav-this-1-2 %}{% endblock %}">Namespaces</a></dd>
+                        <dd><a href="{% url 'pv' %}"
+                               class="{% block nav-this-1-3 %}{% endblock %}">PersistentVolumes</a>
+                        </dd>
+                    </dl>
+                </li>
+                <li class=" layui-nav-item {% block nav-item-2 %}{% endblock %}">
+                    <a href="javascript:;">工作负载</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="{% url 'deployment' %}"
+                               class="{% block nav-this-2-1 %}{% endblock %}">Deployments</a></dd>
+                        <dd><a href="{% url 'daemonset' %}"
+                               class="{% block nav-this-2-2 %}{% endblock %}">DaemonSets</a></dd>
+                        <dd><a href="{% url 'statefulset' %}"
+                               class="{% block nav-this-2-3 %}{% endblock %}">StatefulSets</a></dd>
+                        <dd><a href="{% url 'pods' %}"
+                               class="{% block nav-this-2-4 %}{% endblock %}">Pods</a></dd>
+                        <dd><a href="{% url 'cronjobs' %}"
+                               class="{% block nav-this-2-5 %}{% endblock %}">CronJobs</a></dd>
+                        <dd><a href="{% url 'jobs' %}"
+                               class="{% block nav-this-2-6 %}{% endblock %}">Jobs</a></dd>
+                    </dl>
+                </li>
+                <li class="layui-nav-item {% block nav-item-3 %}{% endblock %}">
+                    <a href="javascript:;">负载均衡</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="{% url 'service' %}"
+                               class="{% block nav-this-3-1 %}{% endblock %}">Serivces</a></dd>
+                        <dd><a href="{% url 'ingress' %}"
+                               class="{% block nav-this-3-2 %}{% endblock %}">Ingresses</a></dd>
+                    </dl>
+                </li>
+                <li class="layui-nav-item {% block nav-item-4 %}{% endblock %}">
+                    <a href="javascript:;">存储与配置</a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="{% url 'pvc' %}"
+                               class="{% block nav-this-4-1 %}{% endblock %}">PersistentVolumeClaims</a></dd>
+                        <dd><a href="{% url 'configmap' %}"
+                               class="{% block nav-this-4-2 %}{% endblock %}">ConfigMaps</a></dd>
+                        <dd><a href="{% url 'secret' %}"
+                               class="{% block nav-this-4-3 %}{% endblock %}">Secrets</a></dd>
+                    </dl>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="layui-body" style="background-color: #edeff0">
+        <!-- 内容主体区域 -->
+        <div style="padding: 15px;">
+            {% block content %} {% endblock %}
+        </div>
+    </div>
+
+    <div class="layui-footer">
+        <!-- 底部固定区域 -->
+        底部固定区域
+    </div>
+</div>
+<script src="/static/layui/layui.js"></script>
+{% block js %} {% endblock %}
+<script>
+    //JS
+    layui.use(['element', 'jquery', 'layer', 'util'], function () {
+        var element = layui.element
+            , layer = layui.layer
+            , util = layui.util
+            , $ = layui.$;
+
+        $.ajax({
+            type: "GET",
+            url: "{% url 'namespace_api' %}",
+            timeout: 5000,
+            async: false,
+            success: function (res) {
+                console.log(res.data)
+                if (res.code == 0) {
+                    for (let index in res.data) {
+                        row = res.data[index];
+                        $("#nsSelect").append('<option value=' + row.name + '>' + row.name + '</option>')
+                    }
+                    // 设置默认命名空间
+                    $("#nsSelect").val("default")
+                } else {
+                    layer.msg(res.msg)
+                    $("#nsSelect").prepend('<option value=' + res.msg + '>' + res.msg + '</option>')
+                    $("#nsSelect").attr("disabled", "disabled")
+                }
+            },
+            error: function () {
+                layer.msg("服务器接口异常！",{icon: 5})
+            }
+        });
+        console.log($("#nsSelect").val());
+        // 将当前选择的命名空间保存到本地浏览器session存储，以便其他页面能获取到当前选择的命名空间
+        var storage = window.sessionStorage;
+        var namespace = storage.getItem("namespace")
+        var current_ns = $("#nsSelect").val();
+        if (namespace == null) {
+            storage.setItem('namespace', current_ns)
+        } else {
+            $("#nsSelect").val(namespace)
+        }
+        $("#nsSelect").change(function () {
+            var current_ns = $("#nsSelect").val();
+            storage.setItem('namespace', current_ns)
+            var namespace = storage.getItem("namespace")
+            console.log(namespace)
+        })
+
+        //头部事件
+        util.event('lay-header-event', {
+            //左侧菜单事件
+            menuLeft: function (othis) {
+                layer.msg('展开左侧菜单的操作', {icon: 0});
+            }
+            , menuRight: function () {
+                layer.open({
+                    type: 1
+                    , content: '<div style="padding: 15px;">处理右侧面板的操作</div>'
+                    , area: ['260px', '100%']
+                    , offset: 'rt' //右上角
+                    , anim: 5
+                    , shadeClose: true
+                });
+            }
+        });
+
+    });
+</script>
+</body>
+</html>
