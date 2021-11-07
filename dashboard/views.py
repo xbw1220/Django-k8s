@@ -79,11 +79,10 @@ def namespace_api(request):
                 msg = "没有访问权限"
             else:
                 msg = "获取数据失败"
-
         count = len(data)
-
         page = int(request.GET.get('page', 1))
-        limit = int(request.GET.get('limit'))
+        # limit = int(request.GET.get('name'))
+        limit = count
         start = (page - 1) * limit
         end = page * limit
         data = data[start:end]
